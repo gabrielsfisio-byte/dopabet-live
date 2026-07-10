@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Coins, Crown, History, Home as HomeIcon, Menu, Plus, User, X } from "lucide-react";
+import { Coins, Crown, Gamepad2, History, Home as HomeIcon, Menu, Plus, User, X } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { formatBRL } from "@/lib/utils";
 import { MAX_BALANCE } from "@/lib/mock-data";
@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 const NAV_LINKS = [
   { href: "/", label: "Início", icon: HomeIcon },
+  { href: "/futebol-virtual", label: "Futebol Virtual", icon: Gamepad2 },
   { href: "/historico", label: "Histórico", icon: History },
 ];
 

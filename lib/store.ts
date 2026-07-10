@@ -2,8 +2,34 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { BetHistoryEntry, BetResult, BetSlipItem, SelectionInput } from "./types";
+import type { BetHistoryEntry, BetResult, BetSlipItem, Match, SelectionInput } from "./types";
 import { MAX_BALANCE, STARTING_BALANCE } from "./mock-data";
+
+/** Avalia se uma seleção específica bateu, com base no placar final real de uma partida. */
+export function evaluateSelection(selection: SelectionInput, finalMatch: Match): boolean {
+  const home = finalMatch.scoreHome ?? 0;
+  const away = finalMatch.scoreAway ?? 0;
+  const total = home + away;
+
+  switch (selection.market) {
+    case "1x2-home":
+      return home > away;
+    case "1x2-draw":
+      return home === away;
+    case "1x2-away":
+      return away > home;
+    case "over":
+      return total > 2.5;
+    case "under":
+      return total < 2.5;
+    case "btts-yes":
+      return home > 0 && away > 0;
+    case "btts-no":
+      return home === 0 || away === 0;
+    default:
+      return false;
+  }
+}
 
 interface AppState {
   balance: number;
@@ -15,6 +41,7 @@ interface AppState {
   clearSlip: () => void;
   placeBet: (stake: number, mode: "single" | "multiple") => BetHistoryEntry[] | null;
   settleBet: (entryIds: string[], win: boolean) => void;
+  settleAgainstResult: (matchId: string, finalMatch: Match) => { entryIds: string[]; anyWin: boolean; creditedAmount: number };
 }
 
 export const useAppStore = create<AppState>()(
@@ -97,6 +124,30 @@ export const useAppStore = create<AppState>()(
           history: updatedHistory,
           balance: win ? balance + creditedAmount : balance,
         });
+      },
+
+      settleAgainstResult: (matchId, finalMatch) => {
+        const { history, balance } = get();
+        let creditedAmount = 0;
+        const settledIds: string[] = [];
+        let anyWin = false;
+
+        const updatedHistory = history.map((entry) => {
+          if (entry.result !== "pending") return entry;
+          const belongsToThisMatch = entry.selections.every((s) => s.matchId === matchId);
+          if (!belongsToThisMatch) return entry;
+
+          settledIds.push(entry.id);
+          const allWin = entry.selections.every((s) => evaluateSelection(s, finalMatch));
+          if (allWin) {
+            creditedAmount += entry.potentialReturn;
+            anyWin = true;
+          }
+          return { ...entry, result: (allWin ? "won" : "lost") as BetResult };
+        });
+
+        set({ history: updatedHistory, balance: balance + creditedAmount });
+        return { entryIds: settledIds, anyWin, creditedAmount };
       },
     }),
     { name: "dopamine-bet-storage" }

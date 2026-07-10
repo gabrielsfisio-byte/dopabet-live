@@ -122,14 +122,21 @@ export async function fetchRealMatches(): Promise<Match[] | null> {
   const apiKey = process.env.FOOTBALL_DATA_API_KEY;
   if (!apiKey) return null;
 
+  const dateFrom = new Date().toISOString().slice(0, 10);
+  const dateTo = new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
   try {
     const results = await Promise.all(
       COMPETITION_CODES.map(async (code) => {
-        const res = await fetch(`${API_BASE}/competitions/${code}/matches?status=SCHEDULED,LIVE,IN_PLAY,PAUSED,FINISHED`, {
+        const url = `${API_BASE}/competitions/${code}/matches?status=SCHEDULED,LIVE,IN_PLAY,PAUSED&dateFrom=${dateFrom}&dateTo=${dateTo}`;
+        const res = await fetch(url, {
           headers: { "X-Auth-Token": apiKey },
           next: { revalidate: 60 }, // cache de 60s no servidor para não estourar o limite de requisições
         });
-        if (!res.ok) return [];
+        if (!res.ok) {
+          console.error(`football-data.org: ${code} respondeu ${res.status}`);
+          return [];
+        }
         const data = await res.json();
         return (data.matches ?? []) as RawMatch[];
       })

@@ -5,6 +5,7 @@ import { Ticket } from "lucide-react";
 import { Navbar } from "./navbar";
 import { DisclaimerBanner } from "./disclaimer-banner";
 import { BetSlip } from "./betting/bet-slip";
+import { BetSettlementWatcher } from "./betting/bet-settlement-watcher";
 import { useAppStore } from "@/lib/store";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <BetSettlementWatcher />
       <DisclaimerBanner />
       <Navbar />
 

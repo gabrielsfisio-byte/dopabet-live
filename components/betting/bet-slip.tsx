@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Trash2, Ticket } from "lucide-react";
+import { Trash2, Ticket, Clock } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { formatBRL } from "@/lib/utils";
-import confetti from "canvas-confetti";
 
 export function BetSlip() {
   const slip = useAppStore((s) => s.slip);
@@ -12,11 +11,10 @@ export function BetSlip() {
   const removeSelection = useAppStore((s) => s.removeSelection);
   const clearSlip = useAppStore((s) => s.clearSlip);
   const placeBet = useAppStore((s) => s.placeBet);
-  const settleBet = useAppStore((s) => s.settleBet);
 
   const [mode, setMode] = useState<"single" | "multiple">("multiple");
   const [stake, setStake] = useState<number>(10);
-  const [feedback, setFeedback] = useState<null | { win: boolean; amount: number }>(null);
+  const [feedback, setFeedback] = useState<null | { count: number }>(null);
 
   const totalOdd = useMemo(() => slip.reduce((acc, s) => acc * s.odd, 1), [slip]);
   const totalStake = mode === "single" ? stake * slip.length : stake;
@@ -32,21 +30,10 @@ export function BetSlip() {
     const entries = placeBet(stake, mode);
     if (!entries) return;
 
-    // Simulate quick fictional settlement for immediate dopamine feedback.
-    setTimeout(() => {
-      const win = Math.random() < 0.55; // slightly favorable early results
-      settleBet(entries.map((e) => e.id), win);
-      if (win) {
-        confetti({
-          particleCount: 120,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ["#39ff8a", "#39d0ff", "#ffd93b"],
-        });
-      }
-      setFeedback({ win, amount: entries.reduce((a, e) => a + e.potentialReturn, 0) });
-      setTimeout(() => setFeedback(null), 3200);
-    }, 600);
+    // A aposta fica "pendente" de verdade — só resolve quando a partida real
+    // (ou a rodada de Futebol Virtual) terminar. Ver components/betting/bet-settlement-watcher.tsx.
+    setFeedback({ count: entries.length });
+    setTimeout(() => setFeedback(null), 3200);
   }
 
   return (
@@ -146,18 +133,14 @@ export function BetSlip() {
       )}
 
       {feedback && (
-        <div
-          className={`fixed sm:absolute inset-x-4 bottom-4 sm:inset-x-auto sm:right-4 sm:left-4 z-50 rounded-lg border p-4 shadow-xl animate-in ${
-            feedback.win ? "bg-up/15 border-up text-up" : "bg-down/15 border-down text-down"
-          }`}
-        >
-          <p className="font-display font-bold text-lg">
-            {feedback.win ? "🎉 Você ganhou (fictício)!" : "😬 Não foi essa (fictício)"}
+        <div className="fixed sm:absolute inset-x-4 bottom-4 sm:inset-x-auto sm:right-4 sm:left-4 z-50 rounded-lg border p-4 shadow-xl animate-in bg-accent/15 border-accent text-accent">
+          <p className="font-display font-bold text-lg flex items-center gap-2">
+            <Clock className="size-4" />
+            Aposta registrada!
           </p>
           <p className="text-sm opacity-90">
-            {feedback.win
-              ? `+${formatBRL(feedback.amount)} em créditos fictícios.`
-              : "Sem problema, é tudo simulado — tente de novo."}
+            {feedback.count === 1 ? "Sua aposta" : `Suas ${feedback.count} apostas`} ficaram pendentes — o
+            resultado sai quando a partida terminar de verdade. Acompanhe no Histórico.
           </p>
         </div>
       )}

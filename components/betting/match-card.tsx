@@ -1,23 +1,30 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowDown, ArrowUp, ChevronDown, Radio } from "lucide-react";
-import type { Match } from "@/lib/types";
+import type { Match, Team } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
 import { OddButton } from "./odd-button";
 import { cn } from "@/lib/utils";
 
-function TeamRow({ name, short, color, score, isLive }: { name: string; short: string; color: string; score?: number; isLive: boolean }) {
+function TeamRow({ team, score, isLive }: { team: Team; score?: number; isLive: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2 min-w-0">
-        <span
-          className="flex items-center justify-center size-6 rounded-full text-[10px] font-bold shrink-0"
-          style={{ backgroundColor: color, color: "#0a0a0a" }}
-        >
-          {short.slice(0, 2)}
-        </span>
-        <span className="text-sm font-medium truncate">{name}</span>
+        {team.crestUrl ? (
+          <span className="relative flex items-center justify-center size-6 shrink-0">
+            <Image src={team.crestUrl} alt={team.name} fill sizes="24px" className="object-contain" unoptimized />
+          </span>
+        ) : (
+          <span
+            className="flex items-center justify-center size-6 rounded-full text-[10px] font-bold shrink-0"
+            style={{ backgroundColor: team.color, color: "#0a0a0a" }}
+          >
+            {team.short.slice(0, 2)}
+          </span>
+        )}
+        <span className="text-sm font-medium truncate">{team.name}</span>
       </div>
       {isLive && <span className="scoreboard-number text-lg font-bold">{score ?? 0}</span>}
     </div>
@@ -56,8 +63,8 @@ export function MatchCard({ match }: { match: Match }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <TeamRow name={match.home.name} short={match.home.short} color={match.home.color} score={match.scoreHome} isLive={isLive || isFinished} />
-        <TeamRow name={match.away.name} short={match.away.short} color={match.away.color} score={match.scoreAway} isLive={isLive || isFinished} />
+        <TeamRow team={match.home} score={match.scoreHome} isLive={isLive || isFinished} />
+        <TeamRow team={match.away} score={match.scoreAway} isLive={isLive || isFinished} />
       </div>
 
       {!isFinished && (

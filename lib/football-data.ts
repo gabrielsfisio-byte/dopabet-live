@@ -3,9 +3,10 @@ import type { Match, MatchStatus, Team } from "./types";
 const API_BASE = "https://api.football-data.org/v4";
 
 // Competições cobertas pelo plano gratuito e permanente da football-data.org.
-const COMPETITION_CODES = ["PL", "PD", "BL1", "SA", "FL1", "CL", "BSA"] as const;
+const COMPETITION_CODES = ["WC", "CL", "PL", "PD", "BL1", "SA", "FL1", "BSA", "EC"] as const;
 
 const COMPETITION_LABELS: Record<string, string> = {
+  WC: "Copa do Mundo",
   PL: "Premier League",
   PD: "La Liga",
   BL1: "Bundesliga",
@@ -13,12 +14,14 @@ const COMPETITION_LABELS: Record<string, string> = {
   FL1: "Ligue 1",
   CL: "Champions League",
   BSA: "Brasileirão",
+  EC: "Eurocopa",
 };
 
 interface RawTeam {
   name: string;
   shortName?: string;
   tla?: string;
+  crest?: string;
 }
 
 interface RawMatch {
@@ -60,7 +63,7 @@ function teamColor(name: string) {
 
 function toTeam(raw: RawTeam): Team {
   const short = raw.tla || raw.shortName?.slice(0, 3).toUpperCase() || raw.name.slice(0, 3).toUpperCase();
-  return { name: raw.shortName || raw.name, short, color: teamColor(raw.name) };
+  return { name: raw.shortName || raw.name, short, color: teamColor(raw.name), crestUrl: raw.crest };
 }
 
 function mapStatus(apiStatus: string): MatchStatus {

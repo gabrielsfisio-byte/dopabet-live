@@ -5,7 +5,8 @@ export type MatchStatus = "upcoming" | "live" | "finished";
 export interface Team {
   name: string;
   short: string;
-  color: string; // accent hex for the crest chip
+  color: string; // accent hex for the crest chip (fallback quando não há escudo real)
+  crestUrl?: string; // URL do escudo real, quando disponível (jogos reais via API)
 }
 
 export interface OneXTwoOdds {

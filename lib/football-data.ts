@@ -29,8 +29,8 @@ interface RawMatch {
   utcDate: string;
   status: string;
   minute?: number;
-  homeTeam: RawTeam;
-  awayTeam: RawTeam;
+  homeTeam: RawTeam | null;
+  awayTeam: RawTeam | null;
   score: {
     fullTime: { home: number | null; away: number | null };
   };
@@ -61,7 +61,10 @@ function teamColor(name: string) {
   return palette[hashSeed(name) % palette.length];
 }
 
-function toTeam(raw: RawTeam): Team {
+function toTeam(raw: RawTeam | null | undefined): Team {
+  if (!raw || !raw.name) {
+    return { name: "A definir", short: "TBD", color: "#4a4a4a" };
+  }
   const short = raw.tla || raw.shortName?.slice(0, 3).toUpperCase() || raw.name.slice(0, 3).toUpperCase();
   return { name: raw.shortName || raw.name, short, color: teamColor(raw.name), crestUrl: raw.crest };
 }
@@ -145,7 +148,7 @@ export async function fetchRealMatches(): Promise<Match[] | null> {
       })
     );
 
-    const allMatches = results.flat().map(mapMatch);
+    const allMatches = results.flat().map(mapMatch).filter((m) => m.home.short !== "TBD" && m.away.short !== "TBD");
 
     // Prioriza jogos ao vivo, depois os mais próximos, limitando a quantidade exibida.
     return allMatches

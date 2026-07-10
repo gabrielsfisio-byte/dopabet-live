@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --background: #07090c;
+  --surface: #0f1319;
+  --surface-2: #161c24;
+  --border: #232b36;
+  --foreground: #eef2f6;
+  --muted: #7c8998;
+
+  --up: #39ff8a;
+  --up-dim: #1c6b3f;
+  --down: #ff3b5c;
+  --down-dim: #6b1c2b;
+  --live: #ff6a00;
+  --accent: #39d0ff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-up: var(--up);
+  --color-up-dim: var(--up-dim);
+  --color-down: var(--down);
+  --color-down-dim: var(--down-dim);
+  --color-live: var(--live);
+  --color-accent: var(--accent);
+  --font-display: "Rajdhani", "Oswald", "Arial Narrow", sans-serif;
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Roboto Mono", ui-monospace, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.scoreboard-number {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+}
+
+@keyframes odd-pulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.odd-pulse {
+  animation: odd-pulse 0.4s ease-out;
+}
+
+@keyframes live-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.live-dot {
+  animation: live-dot 1.2s ease-in-out infinite;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
